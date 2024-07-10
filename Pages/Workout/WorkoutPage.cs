@@ -108,11 +108,3 @@ public class WorkoutParameters
 {
     public WorkoutModes SelectedWorkoutMode { get; set; }
 }
-
-public record DurationOption(TimeSpan Duration)
-{
-    public override string ToString()
-    {
-        return Duration.TotalMinutes > 1 ? $"{Duration.TotalMinutes} minutes" : $"{Duration.TotalMinutes} minute";
-    }
-}
