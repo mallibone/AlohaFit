@@ -9,7 +9,6 @@ namespace AlohaFit.Pages;
 
 class WorkoutPage : Component<WorkoutState, WorkoutParameters>
 {
-    private Timer? _timer = new Timer(TimeSpan.FromSeconds(1));
     protected override void OnMounted()
     {
         State.DurationOptions =
@@ -22,7 +21,12 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
             Grid(
                 !State.IsRunning
                     ? ConfigurationView()
-                    : RunningView()
+                    : RunningView(),
+
+            Timer()
+                .Interval(1000)
+                .IsEnabled(State.IsRunning)
+                .OnTick(TimerCallback)
             )
         ).Title($"{Props.SelectedWorkoutMode}");
 
@@ -50,14 +54,14 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
                         .Style("H3")
                         .HCenter(),
                     HStack(
-                            Picker()
-                                .Title("Select Duration")
-                                .SelectedIndex(State.SelectedDurationIndex)
-                                .ItemsSource(State.DurationOptions.Select(d => d.ToString()).ToList())
-                                .Style("SubHeadline")
-                                .OnSelectedIndexChanged(i => State.SelectedDurationIndex = i)
-                        )
-                        .Spacing(4).HCenter()
+                        Picker()
+                            .Title("Select Duration")
+                            .SelectedIndex(State.SelectedDurationIndex)
+                            .ItemsSource(State.DurationOptions.Select(d => d.ToString()).ToList())
+                            .Style("SubHeadline")
+                            .OnSelectedIndexChanged(i => State.SelectedDurationIndex = i)
+                    )
+                    .Spacing(4).HCenter()
                 )
                 .Spacing(18)
                 .VCenter(),
@@ -66,28 +70,29 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
 
     private void StartWorkout()
     {
-        SetState(s => s.IsRunning = true);
-        SetState(s => s.StartTime = DateTimeOffset.Now);
-        SetState(s => s.Duration = TimeSpan.FromMinutes(s.SelectedDurationIndex+1));
-        var elapsed = DateTimeOffset.Now - State.StartTime;
-        SetState(s => s.Remaining = State.Duration - elapsed);
-        _timer.Elapsed += TimerCallback;
-        _timer.AutoReset = true;
-        _timer.Interval = 1000; // 1 second
-        _timer.Start();
+        SetState(s =>
+        {
+            s.IsRunning = true;
+            s.StartTime = DateTimeOffset.Now;
+            s.Duration = TimeSpan.FromMinutes(s.SelectedDurationIndex + 1);
+            var elapsed = DateTimeOffset.Now - State.StartTime;
+            s.Remaining = State.Duration - elapsed;
+        });
     }
 
-    private void TimerCallback(object? sender, ElapsedEventArgs e)
+    private void TimerCallback()
     {
         var elapsed = DateTimeOffset.Now - State.StartTime;
         var remaining = State.Duration - elapsed;
         if (remaining <= TimeSpan.Zero)
         {
-            _timer.Stop();
-            SetState(s => s.IsRunning = false);
-            SetState(s => s.Duration = TimeSpan.Zero);
-            SetState(s => s.Rounds = 0);
-            SetState(s => s.WorkoutCompleted = true);
+            SetState(s =>
+            {
+                s.IsRunning = false;
+                s.Duration = TimeSpan.Zero;
+                s.Rounds = 0;
+                s.WorkoutCompleted = true;
+            });
             return;
         }
 
@@ -96,11 +101,13 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
 
     private void StopWorkout()
     {
-        SetState(s => s.IsRunning = false);
-        SetState(s => s.Duration = TimeSpan.Zero);
-        SetState(s => s.Remaining = TimeSpan.Zero);
-        SetState(s => s.Rounds = 0);
-        _timer.Stop();
+        SetState(s =>
+        {
+            s.IsRunning = false;
+            s.Duration = TimeSpan.Zero;
+            s.Remaining = TimeSpan.Zero;
+            s.Rounds = 0;
+        });
     }
 }
 
