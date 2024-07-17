@@ -14,7 +14,7 @@ class MainPage : Component
             param => param.SelectedWorkoutMode = WorkoutModes.ForTime);
 
     private async void NavigateToEmom() =>
-        await Microsoft.Maui.Controls.Shell.Current.GoToAsync<WorkoutParameters>(NavigationRoutes.WorkoutPage,
+        await Microsoft.Maui.Controls.Shell.Current.GoToAsync<WorkoutParameters>(NavigationRoutes.EmomWorkoutPage,
             param => param.SelectedWorkoutMode = WorkoutModes.EMOM);
     
     private async void NavigateToTabata() =>

@@ -1,16 +1,38 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using AlohaFit.Types;
 using MauiReactor;
 
 namespace AlohaFit.Pages;
 
-class WorkoutPage : Component<WorkoutState, WorkoutParameters>
+public class EmomWorkoutPage : Component<EmomWorkoutState, WorkoutParameters>
 {
     protected override void OnMounted()
     {
-        State.DurationOptions =
-            Enumerable.Range(1, 100).Select(i => new DurationOption(TimeSpan.FromMinutes(i))).ToArray();
+        State.DurationOptions = new List<DurationOption>
+        {
+            new(TimeSpan.FromSeconds(30)),
+            new(TimeSpan.FromSeconds(45)),
+            new(TimeSpan.FromSeconds(60)),
+            new(TimeSpan.FromSeconds(75)),
+            new(TimeSpan.FromSeconds(90)),
+            new(TimeSpan.FromSeconds(120)),
+            new(TimeSpan.FromSeconds(150)),
+            new(TimeSpan.FromSeconds(180)),
+            new(TimeSpan.FromSeconds(210)),
+            new(TimeSpan.FromSeconds(240)),
+            new(TimeSpan.FromSeconds(300)),
+            new(TimeSpan.FromSeconds(360)),
+            new(TimeSpan.FromSeconds(420)),
+            new(TimeSpan.FromSeconds(480)),
+            new(TimeSpan.FromSeconds(540)),
+            new(TimeSpan.FromSeconds(600)),
+            new(TimeSpan.FromSeconds(660)),
+            new(TimeSpan.FromSeconds(720)),
+            new(TimeSpan.FromSeconds(780)),
+            new(TimeSpan.FromSeconds(840)),
+            new(TimeSpan.FromSeconds(900)),
+        };
         base.OnMounted();
     }
 
@@ -20,14 +42,13 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
                 !State.IsRunning
                     ? ConfigurationView()
                     : RunningView(),
-
             Timer()
                 .Interval(1000)
                 .IsEnabled(State.IsRunning)
                 .OnTick(TimerCallback)
             )
         ).Title($"{Props.SelectedWorkoutMode}");
-
+    
     private VisualNode RunningView() =>
         Grid("*,Auto", "*",
             VStack(
@@ -52,20 +73,20 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
                         .Style("H3")
                         .HCenter(),
                     HStack(
-                        Picker()
-                            .Title("Select Duration")
-                            .SelectedIndex(State.SelectedDurationIndex)
-                            .ItemsSource(State.DurationOptions.Select(d => d.ToString()).ToList())
-                            .Style("SubHeadline")
-                            .OnSelectedIndexChanged(i => State.SelectedDurationIndex = i)
-                    )
-                    .Spacing(4).HCenter()
+                            Picker()
+                                .Title("Select Duration")
+                                .SelectedIndex(State.SelectedDurationIndex)
+                                .ItemsSource(State.DurationOptions.Select(d => d.ToString()).ToList())
+                                .Style("SubHeadline")
+                                .OnSelectedIndexChanged(i => State.SelectedDurationIndex = i)
+                        )
+                        .Spacing(4).HCenter()
                 )
                 .Spacing(18)
                 .VCenter(),
             Components.PrimaryButton("Start Workout", Colors.DarkOrange, StartWorkout)
                 .GridRow(1));
-
+    
     private void StartWorkout()
     {
         SetState(s =>
@@ -87,8 +108,8 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
             SetState(s =>
             {
                 s.IsRunning = false;
+                s.WorkoutCompleted = true;
                 s.Duration = TimeSpan.Zero;
-                s.Rounds = 0;
                 s.WorkoutCompleted = true;
             });
             return;
@@ -103,13 +124,22 @@ class WorkoutPage : Component<WorkoutState, WorkoutParameters>
         {
             s.IsRunning = false;
             s.Duration = TimeSpan.Zero;
-            s.Remaining = TimeSpan.Zero;
             s.Rounds = 0;
+
         });
     }
 }
 
-public class WorkoutParameters
+public class EmomWorkoutState
 {
-    public WorkoutModes SelectedWorkoutMode { get; set; }
+    public DateTimeOffset StartTime { get; set; }
+    public TimeSpan Duration { get; set; }
+    public int Rounds { get; set; }
+    public bool IsRunning { get; set; }
+    public IReadOnlyCollection<DurationOption> DurationOptions { get; set; } = Array.Empty<DurationOption>();
+    public int SelectedDurationIndex { get; set; }
+    public bool WorkoutCompleted { get; set; }
+    public TimeSpan Remaining { get; set; }
+    public string DurationLabel { get; set; } = "Every";
+    public string RoundLabel { get; set; } = "For";
 }

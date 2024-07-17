@@ -19,6 +19,7 @@
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
     <Nullable>enable</Nullable>
+    <WarningsAsErrors>Nullable</WarningsAsErrors>
 
     <!-- Display name -->
     <ApplicationTitle>AlohaFit</ApplicationTitle>
